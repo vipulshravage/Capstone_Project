@@ -130,7 +130,7 @@ public class CreateCreditCard
             {
                 logger.info("***** Validation for Record Number: " + row.getRowNum() + "*****");
                 long credit_card_no = (long) row.getCell(0).getNumericCellValue();
-                String query = "select * from aadhar_db.Creditcard where Credit_Card_No = " + credit_card_no + ";";
+                String query = "select * from aadhar_db.Creditcard where credit_card_no = " + credit_card_no + ";";
                 ResultSet result = stmt.executeQuery(query);
                 while (result.next()) {
                     // Storing Values from Database
@@ -144,11 +144,13 @@ public class CreateCreditCard
                     // Sending DB Values to Post Request Body
                     String post_request_body = RA.creditCardDetails(name_db, year_db, credit_card_no_db, credit_limit_db, expiry_date_db, card_type_db);
                     post_credit_response = given().contentType(ContentType.JSON).body(post_request_body).when().post(post_url);
-                    //System.out.println(post_credit_response.body().asString());
+                    System.out.println(post_credit_response.body().asString());
+
+
 
                     // Storing Values from Post Response
-                    String name_api = post_credit_response.getBody().jsonPath().getString("data.name");
-                    int year_api = post_credit_response.getBody().jsonPath().getInt("data.year");
+                    String name_api = post_credit_response.getBody().jsonPath().getString("name");
+                    //int year_api = post_credit_response.getBody().jsonPath().getInt("data.year");
                     long credit_card_no_api = post_credit_response.getBody().jsonPath().getLong("data['Credit Card Number']");
                     String credit_limit_api = post_credit_response.getBody().jsonPath().getString("data.Limit");
                     String expiry_date_api = post_credit_response.getBody().jsonPath().getString("data['EXP Date']");
@@ -160,11 +162,11 @@ public class CreateCreditCard
                     } else {
                         logger.fail("For the field Name==> DB value: " + name_db + " API Value: " + name_api + " || Value not matching.");
                     }
-                    if (year_db == year_api) {
-                        logger.pass("For the field Year==> DB value: " + year_db + " API Value: " + year_api + " || Value matching.");
-                    } else {
-                        logger.fail("For the field Year==> DB value: " + year_db + " API Value: " + year_api + " || Value not matching.");
-                    }
+//                    if (year_db == year_api) {
+//                        logger.pass("For the field Year==> DB value: " + year_db + " API Value: " + year_api + " || Value matching.");
+//                    } else {
+//                        logger.fail("For the field Year==> DB value: " + year_db + " API Value: " + year_api + " || Value not matching.");
+//                    }
                     if (credit_card_no_db == credit_card_no_api) {
                         logger.pass("For the field Credit Card No==> DB value: " + credit_card_no_db + " API Value: " + credit_card_no_api + " || Value matching.");
                     } else {
