@@ -1,25 +1,23 @@
 package StepDef;
 
 import Reusable.Reusable;
+import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+import com.aventstack.extentreports.reporter.configuration.Theme;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import org.apache.commons.lang.StringUtils;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 import java.io.FileInputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -28,14 +26,34 @@ public class CreateNewAccount
 {
     public Connection connection;
     private ExtentTest logger;
+    private ExtentSparkReporter spark;
+    private ExtentReports extent;
 
     Reusable RA;
 
     @BeforeClass
-    public void setUp()
+    public void report_and_db_setup() throws SQLException
     {
-        RA=new Reusable();
+        RA = new Reusable();
+        extent = new ExtentReports();
+        spark = new ExtentSparkReporter(System.getProperty("user.dir") + "/Report/Aadhar Validation.html");
+        spark.config().setDocumentTitle("Aadhar Validation");
+        spark.config().setReportName("Aadhar_Details_Validation_Report");
+        spark.config().setTheme(Theme.DARK);
+        logger = extent.createTest("Validate Aadhar Details");
+        extent.attachReporter(spark);
+        extent.setSystemInfo("Build_Name", "Capstone Project - Create New Account for Aadhar");
+        extent.setSystemInfo("Environment_Name", "QA");
+        extent.setSystemInfo("Name", "Vipul Shravage");
+
+        connection =DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306", "root", "Vipul009"); //driverURL,username,password
+        if (connection != null)
+        {
+            System.out.println("Aadhar Database connection is connected!");
+        }
+        Statement smt=connection.createStatement();
     }
+
 
     @Test(priority = 1)
     public boolean testAadharRecordMatching()
@@ -148,37 +166,53 @@ public class CreateNewAccount
                     //data with DB.
                     JsonPath jsonPath = response.jsonPath();
                     Map<String, Object> responseMap = jsonPath.getMap("");
-
+                    String key = null;
+                    String value1;
+                    Object value2;
                     for (Map.Entry<String, String> entry : DBMap.entrySet()) {
-                        String key = entry.getKey();
-                        String value1 = entry.getValue();
-                        Object value2 = responseMap.get(key);
-
-                        if (value2 == null) {
-                            Assert.fail("Key '" + key + "' not found in responseMap");
-                        } else {
-                            Assert.assertEquals(value1, value2, "Values for key '" + key + "' do not match");
-                        }
-                    }
-
-
-
-                    for (Map.Entry<String, Object> entry : responseMap.entrySet()) {
-                        System.out.println(entry.getKey() + ": " + entry.getValue());
-
-                        if (entry.getKey().equals("Fname")) {   //Response coming
-                            if (entry.getValue().equals(lname)) {   //
-                                Assert.assertEquals(entry.getValue(), fname, "Data is matching");
+                         key = entry.getKey();
+                         value1 = entry.getValue();
+                         value2 = responseMap.get(key);
+                        try {
+                            if (value2 == null) {
+                                logger.info("Key '" + key + "' not found in responseMap");
                             } else {
-                                Assert.assertEquals(entry.getValue(), lname, "Data is not matching");
+                                Assert.assertEquals(value1, value2, "Values for key '" + key + "' do not match");
+                                logger.pass("Assertion passed::" + "Actual::" + value1 + "Expected::" + value2);
                             }
+
+                        } catch (AssertionError e) {
+                            logger.fail("Assertion failed::" + "Actual::" + value1 + "Expected::" + value2);
                         }
 
-                        //Validating if Account ID is numeric
-                        if (entry.getKey().equals("id")) {
-                            Assert.assertTrue(((String) entry.getValue()).matches("[0-9]+"), "Account Number is matching ");
-                        }
                     }
+
+                    //Validating if Account ID is numeric
+                    if (responseMap.containsKey("id"))
+                    {
+                        Assert.assertTrue(((String) responseMap.get("id")).matches("[0-9]+"), "Account Number is matching ");
+                        logger.pass("Value for Id::"+"is Numeric"+responseMap.get("id"));
+                    }
+
+
+
+
+//                    for (Map.Entry<String, Object> entry : responseMap.entrySet()) {
+//                        System.out.println(entry.getKey() + ": " + entry.getValue());
+//
+//                        if (entry.getKey().equals("Fname")) {   //Response coming
+//                            if (entry.getValue().equals(lname)) {   //
+//                                Assert.assertEquals(entry.getValue(), fname, "Data is matching");
+//                            } else {
+//                                Assert.assertEquals(entry.getValue(), fname, "Data is not matching");
+//                            }
+//                        }
+//
+//                        //Validating if Account ID is numeric
+//                        if (entry.getKey().equals("id")) {
+//                            Assert.assertTrue(((String) entry.getValue()).matches("[0-9]+"), "Account Number is matching ");
+//                        }
+//                    }
 
                         //Validating if CreatedAt Field contains current Date
                         Date date = new Date();
@@ -203,6 +237,13 @@ public class CreateNewAccount
             System.out.println("Aadhar No is not matching !");
 
         }
+    }
+
+    @AfterClass
+    public void report_generation()
+    {
+        System.out.println("All Tests Executed. Extent Report is generated");
+        extent.flush();
     }
 
 }

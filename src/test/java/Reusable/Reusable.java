@@ -9,14 +9,13 @@ public class Reusable
     public String CreatePostJson(String fname,String lname,String aadharNo,String address,String phone)
     {
 
-        String body="{\"Fname\":\""+fname+"\"," +
-                            "\"Lname\":\""+lname+"\"," +
-                            "\"Aadhar_No\":\""+aadharNo+"\"," +
-                            "\"Address\":\""+address+"\"," +
-                            "\"Phone\":\""+phone+
-                            "}";
-
-
+        String body = "{\n" +
+                "\"Fname\": \""+fname+"\",\n" +
+                "\"Lname\": \""+lname+"\",\n" +
+                "\"Aadhar_No\": \""+aadharNo+"\",\n" +
+                "\"Address\": \""+address+"\",\n" +
+                "\"Phone\": \""+phone+"\"\n" +
+                "}";
         return body;
     }
 
