@@ -36,7 +36,7 @@ public class Reusable
 
     public static String creditCardDetails(String name,int year,long credit_card_no,String limit,String expiry_date,String card_type)
     {
-        String post_request_body = "{\n" +
+        String body = "{\n" +
                 "\"name\": \""+name+"\",\n" +
                 "\"data\": {\n" +
                 "\"year\": "+year+",\n" +
@@ -46,7 +46,7 @@ public class Reusable
                 "\"Card Type\": \""+card_type+"\"\n" +
                 "}\n" +
                 "}";
-        return post_request_body;
+        return body;
     }
 
     public String date_extractor(String created_at)

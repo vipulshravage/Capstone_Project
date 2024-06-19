@@ -187,32 +187,13 @@ public class CreateNewAccount
 
                     }
 
+
                     //Validating if Account ID is numeric
                     if (responseMap.containsKey("id"))
                     {
                         Assert.assertTrue(((String) responseMap.get("id")).matches("[0-9]+"), "Account Number is matching ");
                         logger.pass("Value for Id::"+"is Numeric"+responseMap.get("id"));
                     }
-
-
-
-
-//                    for (Map.Entry<String, Object> entry : responseMap.entrySet()) {
-//                        System.out.println(entry.getKey() + ": " + entry.getValue());
-//
-//                        if (entry.getKey().equals("Fname")) {   //Response coming
-//                            if (entry.getValue().equals(lname)) {   //
-//                                Assert.assertEquals(entry.getValue(), fname, "Data is matching");
-//                            } else {
-//                                Assert.assertEquals(entry.getValue(), fname, "Data is not matching");
-//                            }
-//                        }
-//
-//                        //Validating if Account ID is numeric
-//                        if (entry.getKey().equals("id")) {
-//                            Assert.assertTrue(((String) entry.getValue()).matches("[0-9]+"), "Account Number is matching ");
-//                        }
-//                    }
 
                         //Validating if CreatedAt Field contains current Date
                         Date date = new Date();

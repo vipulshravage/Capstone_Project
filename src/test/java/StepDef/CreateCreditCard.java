@@ -18,10 +18,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.logging.Logger;
-
 import static io.restassured.RestAssured.given;
 
 public class CreateCreditCard
@@ -129,7 +125,7 @@ public class CreateCreditCard
             if (row.getRowNum() != 0)
             {
                 logger.info("***** Validation for Record Number: " + row.getRowNum() + "*****");
-                long credit_card_no = (long) row.getCell(0).getNumericCellValue();
+                String credit_card_no = formatter.formatCellValue(row.getCell(0));
                 String query = "select * from aadhar_db.Creditcard where credit_card_no = " + credit_card_no + ";";
                 ResultSet result = stmt.executeQuery(query);
                 while (result.next()) {
@@ -147,7 +143,6 @@ public class CreateCreditCard
                     System.out.println(post_credit_response.body().asString());
 
 
-
                     // Storing Values from Post Response
                     String name_api = post_credit_response.getBody().jsonPath().getString("name");
                     //int year_api = post_credit_response.getBody().jsonPath().getInt("data.year");
@@ -162,11 +157,6 @@ public class CreateCreditCard
                     } else {
                         logger.fail("For the field Name==> DB value: " + name_db + " API Value: " + name_api + " || Value not matching.");
                     }
-//                    if (year_db == year_api) {
-//                        logger.pass("For the field Year==> DB value: " + year_db + " API Value: " + year_api + " || Value matching.");
-//                    } else {
-//                        logger.fail("For the field Year==> DB value: " + year_db + " API Value: " + year_api + " || Value not matching.");
-//                    }
                     if (credit_card_no_db == credit_card_no_api) {
                         logger.pass("For the field Credit Card No==> DB value: " + credit_card_no_db + " API Value: " + credit_card_no_api + " || Value matching.");
                     } else {
