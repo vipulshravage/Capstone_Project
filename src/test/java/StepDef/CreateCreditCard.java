@@ -26,7 +26,7 @@ public class CreateCreditCard
     private ExtentSparkReporter spark;
     private ExtentReports extent;
     private ExtentTest logger;
-    Response post_credit_response;
+    Response response1;
     Reusable RA;
     DataFormatter formatter = new DataFormatter();
 
@@ -35,7 +35,7 @@ public class CreateCreditCard
     {
         RA = new Reusable();
         extent = new ExtentReports();
-        spark = new ExtentSparkReporter(System.getProperty("user.dir") + "/Report/Credit_Card_Validation.html");
+        spark = new ExtentSparkReporter(System.getProperty("user.dir") + "/Report/Credit Card Validation.html");
         spark.config().setDocumentTitle("Credit Card Details Validation");
         spark.config().setReportName("Credit_Card_Details_Validation_Report");
         spark.config().setTheme(Theme.DARK);
@@ -124,11 +124,12 @@ public class CreateCreditCard
         {
             if (row.getRowNum() != 0)
             {
-                logger.info("***** Validation for Record Number: " + row.getRowNum() + "*****");
+                logger.info("Validation for Record Number: " + row.getRowNum());
                 String credit_card_no = formatter.formatCellValue(row.getCell(0));
                 String query = "select * from aadhar_db.Creditcard where credit_card_no = " + credit_card_no + ";";
                 ResultSet result = stmt.executeQuery(query);
                 while (result.next()) {
+
                     // Storing Values from Database
                     String name_db = result.getString(1);
                     int year_db = result.getInt(2);
@@ -139,17 +140,17 @@ public class CreateCreditCard
 
                     // Sending DB Values to Post Request Body
                     String post_request_body = RA.creditCardDetails(name_db, year_db, credit_card_no_db, credit_limit_db, expiry_date_db, card_type_db);
-                    post_credit_response = given().contentType(ContentType.JSON).body(post_request_body).when().post(post_url);
-                    System.out.println(post_credit_response.body().asString());
+                    response1 = given().contentType(ContentType.JSON).body(post_request_body).when().post(post_url);
+                    System.out.println(response1.body().asString());
 
 
                     // Storing Values from Post Response
-                    String name_api = post_credit_response.getBody().jsonPath().getString("name");
+                    String name_api = response1.getBody().jsonPath().getString("name");
                     //int year_api = post_credit_response.getBody().jsonPath().getInt("data.year");
-                    long credit_card_no_api = post_credit_response.getBody().jsonPath().getLong("data['Credit Card Number']");
-                    String credit_limit_api = post_credit_response.getBody().jsonPath().getString("data.Limit");
-                    String expiry_date_api = post_credit_response.getBody().jsonPath().getString("data['EXP Date']");
-                    String card_type_api = post_credit_response.getBody().jsonPath().getString("data['Card Type']");
+                    long credit_card_no_api = response1.getBody().jsonPath().getLong("data['Credit Card Number']");
+                    String credit_limit_api = response1.getBody().jsonPath().getString("data.Limit");
+                    String expiry_date_api = response1.getBody().jsonPath().getString("data['EXP Date']");
+                    String card_type_api = response1.getBody().jsonPath().getString("data['Card Type']");
 
                     // Validating Post Response against DB Values
                     if (name_db.equals(name_api)) {

@@ -5,7 +5,6 @@ public class AadharDatabase
 {
     Connection connection;
     String driverURL;
-
     public static void main(String[] args)
     {
         AadharDatabase dbconnect=new AadharDatabase();

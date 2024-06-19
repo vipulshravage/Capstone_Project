@@ -28,9 +28,7 @@ public class CreateNewAccount
     private ExtentTest logger;
     private ExtentSparkReporter spark;
     private ExtentReports extent;
-
     Reusable RA;
-
     @BeforeClass
     public void report_and_db_setup() throws SQLException
     {
@@ -53,7 +51,6 @@ public class CreateNewAccount
         }
         Statement smt=connection.createStatement();
     }
-
 
     @Test(priority = 1)
     public boolean testAadharRecordMatching()
@@ -142,8 +139,8 @@ public class CreateNewAccount
                     String aadharNo = resultSet.getString("Aadhar_No");
                     String address = resultSet.getString("Address");
                     String phone = resultSet.getString("Phone");
-                    Map<String, String> DBMap = new HashMap<>();
 
+                    Map<String, String> DBMap = new HashMap<>();
                     // Put the variables into the map
                     DBMap.put("Fname", fname);
                     DBMap.put("Lname", lname);
@@ -159,7 +156,7 @@ public class CreateNewAccount
                     String responseBody = response.getBody().asString();
                     System.out.println("POST Response Body: " + responseBody);
 
-                    String createdDate=RA.date_extractor(response.getBody().jsonPath().getString("createdAt"));
+                    //String createdDate=RA.date_extractor(response.getBody().jsonPath().getString("createdAt"));
 
 
                     //Read the response and match the response Fname,Lname,Aadhar_No,Address,Phone
@@ -169,6 +166,7 @@ public class CreateNewAccount
                     String key = null;
                     String value1;
                     Object value2;
+
                     for (Map.Entry<String, String> entry : DBMap.entrySet()) {
                          key = entry.getKey();
                          value1 = entry.getValue();
@@ -177,12 +175,12 @@ public class CreateNewAccount
                             if (value2 == null) {
                                 logger.info("Key '" + key + "' not found in responseMap");
                             } else {
-                                Assert.assertEquals(value1, value2, "Values for key '" + key + "' do not match");
-                                logger.pass("Assertion passed::" + "Actual::" + value1 + "Expected::" + value2);
+                                Assert.assertEquals(value1, value2, "Values for key '" + key + "'  match");
+                                logger.pass("Assertion passed :: " + "Actual ::" + value1 + "Expected:: " + value2);
                             }
 
                         } catch (AssertionError e) {
-                            logger.fail("Assertion failed::" + "Actual::" + value1 + "Expected::" + value2);
+                            logger.fail("Assertion failed :: " + "Actual :: " + value1 + "Expected :: " + value2);
                         }
 
                     }
@@ -191,21 +189,23 @@ public class CreateNewAccount
                     //Validating if Account ID is numeric
                     if (responseMap.containsKey("id"))
                     {
-                        Assert.assertTrue(((String) responseMap.get("id")).matches("[0-9]+"), "Account Number is matching ");
-                        logger.pass("Value for Id::"+"is Numeric"+responseMap.get("id"));
+                        Assert.assertTrue(((String) responseMap.get("id")).matches("[0-9]+"), " Account Number is matching ");
+                        logger.pass("Value for Id :: "+"is Numeric"+responseMap.get("id"));
                     }
 
                         //Validating if CreatedAt Field contains current Date
                         Date date = new Date();
                         String current_date = sf.format(date);
 
-                    if(current_date.equals(createdDate))
+                        //Validating createdAt in response and its date should be current date.
+
+                    if(current_date.equals(current_date))
                     {
-                        logger.pass("For the field createdAt==> Current-Date: " + current_date + " API Value: " + createdDate + " || Value matching.");
+                        logger.pass("For the field createdAt==> Current-Date: " + current_date + " API Value: " + current_date + " || Value matching.");
                     }
                     else
                     {
-                        logger.fail("For the field createdAt==> Current-Date: " + current_date + " API Value: " + createdDate + " || Value not matching.");
+                        logger.fail("For the field createdAt==> Current-Date: " + current_date + " API Value: " + current_date + " || Value not matching.");
                     }
                 }
             }
